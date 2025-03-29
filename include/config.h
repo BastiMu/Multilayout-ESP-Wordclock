@@ -10,8 +10,6 @@
 #define SDA_PIN_ESP32 21 // Use direct pin number
 #define SCL_PIN_ESP32 22 // Use direct pin number
 
-
-
 //--------------------------------------------------------------------------
 // Front panel layout
 //--------------------------------------------------------------------------
@@ -275,8 +273,8 @@
  * Valid values [only one #define option]
  */
 // #define MINUTE_Off
-//#define MINUTE_LED4x
-#define MINUTE_LED7x
+#define MINUTE_LED4x
+// #define MINUTE_LED7x
 
 //--------------------------------------------------------------------------
 // Front Displaying Options
