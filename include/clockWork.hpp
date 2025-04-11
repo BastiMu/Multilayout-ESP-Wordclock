@@ -96,8 +96,6 @@ iUhrType *ClockWork::getPointer(uint8_t type) {
         return &_de10x11Alternative;
     case Ger10x11AlternativeFrame:
         return &_de10x11AlternativeFrame;
-    case Ger10x11Vertical:
-        return &_de10x11Vertical;
     case Ger10x11Clock:
         return &_de10x11Clock;
     case Ger10x11Nero:
@@ -114,6 +112,8 @@ iUhrType *ClockWork::getPointer(uint8_t type) {
         return &_de11x11V2;
     case Ger11x11V3:
         return &_de11x11V3;
+    case Ger13x13:
+        return &_de13x13;
     case Ger22x11Weather:
         return &_de22x11Weather;
     case Ger16x8:
@@ -577,7 +577,7 @@ bool ClockWork::hasDreiviertelAndCheckForUsage() {
 //------------------------------------------------------------------------------
 
 void ClockWork::setMinute(uint8_t min, uint8_t &offsetHour, bool &fullHour) {
-    if (usedUhrType->has24HourLayout()) {
+    if (usedUhrType->has60MinuteLayout()) {
         usedUhrType->show(FrontWord::uhr);
 
         if (min == 0) {
