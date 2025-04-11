@@ -143,9 +143,9 @@ enum class FrontWord {
 class iUhrType {
 public:
     virtual void setFrontMatrixWord(const uint8_t row, const uint8_t colStart,
-                                    const uint8_t colEnd) {
+                                    const uint8_t colEnd, bool state = true) {
         for (uint8_t i = colStart; i <= colEnd; i++) {
-            setFrontMatrixPixel(row, i);
+            setFrontMatrixPixel(row, i, state);
         }
     }
 

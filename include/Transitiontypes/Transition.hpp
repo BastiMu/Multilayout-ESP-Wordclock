@@ -392,6 +392,28 @@ void Transition::colorize(RgbfColor **dest) {
             dest[7][4] = dest[4][4];
         }
     }
+
+    // correct color of ZEHN, VIER and DREI due non horizontal alignment
+    if (G.UhrtypeDef == Ger11x11V4 && (G.transitionColorize != CHARACTERS)) {
+        // set color of ZEHN
+        if (dest[0][10].isForeground()) {
+            dest[1][10] = dest[0][10];
+            dest[2][10] = dest[0][10];
+            dest[3][10] = dest[0][10];
+        }
+        // set color of VIER
+        if (dest[6][4].isForeground()) {
+            dest[5][4] = dest[7][4];
+            dest[6][4] = dest[7][4];
+            dest[8][4] = dest[7][4];
+        }
+        // set color of DREI
+        if (dest[8][5].isForeground()) {
+            dest[8][6] = dest[8][5];
+            dest[9][5] = dest[8][5];
+            dest[9][6] = dest[8][5];
+        }
+    }
 }
 
 //------------------------------------------------------------------------------

@@ -112,6 +112,8 @@ iUhrType *ClockWork::getPointer(uint8_t type) {
         return &_de11x11V2;
     case Ger11x11V3:
         return &_de11x11V3;
+    case Ger11x11V4:
+        return &_de11x11V4;
     case Ger13x13:
         return &_de13x13;
     case Ger22x11Weather:
@@ -339,7 +341,7 @@ void ClockWork::countdownToMidnight() {
     Serial.printf("Count down: %d\n", 60 - _second);
     switch (_second) {
     case 50:
-        if (!usedUhrType->hasOnlyQuarterLayout()) {
+        if (!usedUhrType->hasOnlyQuarterLayout() && G.UhrtypeDef != Ger11x11V4) {
             usedUhrType->show(FrontWord::min_10);
         } else {
             usedUhrType->show(FrontWord::hour_10);
@@ -358,7 +360,7 @@ void ClockWork::countdownToMidnight() {
         usedUhrType->show(FrontWord::hour_6);
         break;
     case 55:
-        if (!usedUhrType->hasOnlyQuarterLayout()) {
+        if (!usedUhrType->hasOnlyQuarterLayout() && G.UhrtypeDef != Ger11x11V4) {
             usedUhrType->show(FrontWord::min_5);
         } else {
             usedUhrType->show(FrontWord::hour_5);
@@ -579,6 +581,10 @@ bool ClockWork::hasDreiviertelAndCheckForUsage() {
 void ClockWork::setMinute(uint8_t min, uint8_t &offsetHour, bool &fullHour) {
     if (usedUhrType->has60MinuteLayout()) {
         usedUhrType->show(FrontWord::uhr);
+
+        if ((G.UhrtypeDef == Ger11x11V4) && (min > 10)) {
+            offsetHour = 1;
+        }
 
         if (min == 0) {
             fullHour = true;
