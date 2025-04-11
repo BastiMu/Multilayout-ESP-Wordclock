@@ -1394,6 +1394,21 @@ void ClockWork::loop(struct tm &tm) {
         break;
     }
 
+    case COMMAND_SET_LEDPIN: {
+        led.clear();
+
+        // G.param1 sets new buildtype
+        Serial.printf("Clock LED pin: %u\n", G.param1);
+
+        G.LEDpin = G.param1;
+        eeprom::write();
+        initLedStrip(G.Colortype);
+
+        clearClockByProgInit();
+        parametersChanged = true;
+        break;
+    }
+
     case COMMAND_SET_COLORTYPE: {
         // G.param1 sets new Colortype
         Serial.printf("LED Colortype: %u\n", G.param1);
