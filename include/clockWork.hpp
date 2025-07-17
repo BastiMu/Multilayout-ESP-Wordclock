@@ -5,84 +5,100 @@
 #include "clockWork.h"
 #include "openwmap.h"
 #include <Arduino.h>
+#if AUTOBRIGHT_USE_BH1750
 #include <BH1750.h>
+BH1750 lightMeter(0x23);
+bool bh1750Initialized;
+#endif
 
 OpenWMap weather;
-BH1750 lightMeter(0x23);
 
 //------------------------------------------------------------------------------
 // Helper Functions
 //------------------------------------------------------------------------------
 
-// Automatic Brightness Control (enabled/dieabled by G.autoBrightEnabled)
-// 1. Measure ambient light with high resolution sensor BH1750, if available. If
-// not, use legacy LDR.
+// Automatic Brightness Control (enabled/disabled by G.autoBrightEnabled)
+// 1. Measure ambient light with high resolution sensor BH1750, if available.
+//    If not, use legacy LDR.
 // 2. Derive the ledGain for the LEDs 0.0 - 100.0%
-// 3. When ledGain changed, execute led.set()
-// Inputs: autoBrightSlope, autoBrightOffset 0-255
+// 3. When ledGain changed, set parametersChanged = true
+// Inputs:
+//   G.autoBrightEnabled, G.autoBrightMin, G.autoBrightMax, G.autoBrightPeak
+//   AUTOBRIGHT_LDR_RESBRIGHT, AUTOBRIGHT_LDR_RESDARK, AUTOBRIGHT_LDR_RESDIVIDER
 // Outputs:
 //  lux = Ambient light [LUX]
 //  ledGain = gain for the the LEDs: 0.0-100.0% (Gain means n % of the
-//  configured brightness: effectBri)
+//    configured brightness: effectBri)
 void ClockWork::loopAutoBrightLogic() {
-    float ledGainOld = ledGain;
-    if (stateBH1750 == stateBH1750Type::toBeInitialized) {
-        initBH1750Logic();
+    if (G.autoBrightEnabled != 1)
+        return;
+
+    if (G.autoBrightMin == G.autoBrightMax) {
+        // If min and max are identical, nothing needs to be measured...
+        // Besides: map() would crash with division by zero in this case
+        ledGain = G.autoBrightMax;
+        return;
     }
-    if (G.autoBrightEnabled) {
-        if (stateBH1750 == stateBH1750Type::Initialized) {
-            // Using BH1750 for ambient light measurement which directly
-            // provides the LUX value with high resolution!
-            if (lightMeter.measurementReady())
-                lux = lightMeter.readLightLevel(); // 0.0-54612.5 LUX
-        } else {
-            // Using legacy LDR for ambient light measurement
-            // Electrical circuit = voltage divider: 3.3V--LDR-->ADC<--220
-            // Ohm--GND
-            uint16_t adcValue = analogRead(
-                A0); // Read out ADC, pin TOUT = 0.0V - 1.0V = adcValue 0-1023
-            // Track lowest ADC value for offest correction at 0 LUX
-            if (adcValue < adcValue0Lux)
-                adcValue0Lux = adcValue;
-            float ldrValue = adcValue - adcValue0Lux;
-            // Derive LUX value from ldrValue via a second degree polinomial.
-            // The polinomial was derived using an Excel trend line, see
-            // LDR-Calibration.xlsx
-            const float x2 = 0.0427;
-            const float x1 = 2.679;
-            const float x0 = 10.857;
-            lux = x2 * ldrValue * ldrValue + x1 * ldrValue + x0;
+
+    float ledGainOld = ledGain;
+    float luxNow = -1.0;
+
+#if AUTOBRIGHT_USE_BH1750
+    if (bh1750Initialized && lightMeter.measurementReady()) {
+        luxNow = lightMeter.readLightLevel(); // 0.0-54612.5 LUX
+    }
+#endif
+
+#if AUTOBRIGHT_USE_LDR
+    // only use LDR, if no value from BH1750 is available
+    if (luxNow < 0) {
+        uint16_t adcValue = analogRead(A0); // Range 0-1023 (1024 on overflow)
+
+        // The lux value is considerably misrepresented upwards at ADC values
+        // above 980. As 980 with an LDR5528 corresponds to approx. 1500 lux,
+        // but usually no more than 1000 lux are reached indoors even on sunny
+        // days, a fixed upper measurement limit of 980 is set here.
+        // Regardless of this, a maximum value of 1023 has to be applied in
+        // any case in order to avoid division by zero (analogRead is 0-1024)!
+        if (adcValue > 980) {
+            adcValue = 980;
         }
 
-        // Based on the LUX value derive the gain for the LEDs 0.0 - 100.0%
-        // Interpretation of autoBrightSlope+1=aBS: aBS=1 -> slope=1/16x, aBS=16
-        // -> slope=1x, aBS=256 -> slope=16x, When autoBrightOffset=0, and
-        // aBS=16 then ledGain should reach 100.0% at 500.0 LUX.
-        ledGain = (lux * (float)(G.autoBrightSlope + 1)) / 80.0;
-        // Add autoBrightOffset 0-255
-        ledGain +=
-            ((uint16_t)100 * (uint16_t)G.autoBrightOffset) / (uint16_t)255;
-        if (ledGain > 100.0)
-            ledGain = 100.0;
+        luxNow = (adcValue * AUTOBRIGHT_LDR_RESDARK * 10) /
+                 (AUTOBRIGHT_LDR_RESBRIGHT * AUTOBRIGHT_LDR_RESDIVIDER *
+                  (1024 - adcValue));
     }
+#endif
+
+    // If luxNow is still negative, no data could be retrieved from BH1750 or
+    // LDR. We return to preserve the previous ledGain (potentially default).
+    // Otherwise we may end up in a blinking light...
+    if (luxNow < 0) {
+        return;
+    }
+
+    // Even in HIGH_RES_MODE, the BH1750 only has a precision of 1 lux. The
+    // decimal point values supplied by the library should therefore be
+    // considered as 'noise' and their use makes little to no sense.
+    // Also: in order to not trigger parametersChanged more often than
+    // necessary, the value gets rounded.
+    lux = round(luxNow);
+
+    ledGain = map(lux, 0, G.autoBrightPeak, G.autoBrightMin, G.autoBrightMax);
+
+    // Ensure ledGain meets the defined limits.
+    uint16_t minimum = min(G.autoBrightMin, G.autoBrightMax);
+    uint16_t maximum = max(G.autoBrightMin, G.autoBrightMax);
+
+    if (ledGain >= maximum) {
+        ledGain = maximum;
+    }
+    if (ledGain <= minimum) {
+        ledGain = minimum;
+    }
+
     if (ledGainOld != ledGain) {
         parametersChanged = true;
-    }
-}
-
-// Ambient Light Sensor BH1750
-// Initialize the I2C bus using SCL and SDA pins
-// (BH1750 library doesn't do this automatically)
-void ClockWork::initBH1750Logic() {
-    // begin returns a boolean that can be used to detect setup problems.
-    if (lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE)) {
-        Serial.println("BH1750 initialized. Using this sensor for ambient "
-                       "light measurement.");
-        stateBH1750 = stateBH1750Type::Initialized;
-    } else {
-        Serial.println("BH1750 initialisation error. Using legacy LDR for "
-                       "ambient light measurement");
-        stateBH1750 = stateBH1750Type::cannotBeInitialized;
     }
 }
 
@@ -96,8 +112,6 @@ iUhrType *ClockWork::getPointer(uint8_t type) {
         return &_de10x11Alternative;
     case Ger10x11AlternativeFrame:
         return &_de10x11AlternativeFrame;
-    case Ger10x11Vertical:
-        return &_de10x11Vertical;
     case Ger10x11Clock:
         return &_de10x11Clock;
     case Ger10x11Nero:
@@ -116,6 +130,8 @@ iUhrType *ClockWork::getPointer(uint8_t type) {
         return &_de11x11V3;
     case Ger11x11V4:
         return &_de11x11V4;
+    case Ger13x13:
+        return &_de13x13;
     case Ger22x11Weather:
         return &_de22x11Weather;
     case Ger16x8:
@@ -130,6 +146,8 @@ iUhrType *ClockWork::getPointer(uint8_t type) {
         return &_en08x08;
     case Eng10x11:
         return &_en10x11;
+    case Eng11x12:
+        return &_en11x12;
     case Es10x11:
         return &_es10x11;
     case Es08x08Cuarto:
@@ -553,14 +571,15 @@ FrontWord ClockWork::getFrontWordForNum(uint8_t min) {
 //------------------------------------------------------------------------------
 
 bool ClockWork::checkTwentyUsage() {
-    return G.languageVariant[ItIs20] || G.languageVariant[ItIs40];
+    return G.languageVariant[ItIs20] || G.languageVariant[ItIs40] ||
+           usedUhrType->usedLang() == LanguageAbbreviation::ES;
 }
 
 //------------------------------------------------------------------------------
 
 bool ClockWork::hasTwentyAndCheckForUsage() {
     // ToDo: Is this true for every supoorted language variant?
-    return usedUhrType->hasZwanzig() && checkTwentyUsage();
+    return usedUhrType->hasTwenty() && checkTwentyUsage();
 }
 
 //------------------------------------------------------------------------------
@@ -580,21 +599,6 @@ bool ClockWork::hasDreiviertelAndCheckForUsage() {
 
 void ClockWork::setMinute(uint8_t min, uint8_t &offsetHour, bool &fullHour) {
     if (usedUhrType->has60MinuteLayout()) {
-        usedUhrType->show(FrontWord::uhr);
-
-        if (min == 0) {
-            fullHour = true;
-        } else if (min > 0) {
-            usedUhrType->show(getFrontWordForNum(min));
-            usedUhrType->show(FrontWord::und);
-        }
-
-        if (min == 1) {
-            usedUhrType->show(FrontWord::minute);
-        } else if (min > 1) {
-            usedUhrType->show(FrontWord::minuten);
-        }
-    } else if (usedUhrType->has24HourLayout()) {
         usedUhrType->show(FrontWord::uhr);
 
         if (min == 0) {
@@ -1118,10 +1122,10 @@ void ClockWork::loop(struct tm &tm) {
     previousMillis = currentMillis;
 
     // Faster runtime for demo
-    transition->demoMode(_minute, _second);
+    transition->demoMode(_hour, _minute, _second);
 
     //------------------------------------------------
-    // Secounds and LDR Routine
+    // Seconds and LDR Routine
     //------------------------------------------------
     if (lastSecond != _second) {
 
@@ -1141,11 +1145,11 @@ void ClockWork::loop(struct tm &tm) {
         //--------------------------------------------
         // Auto Brightness Logic
         //--------------------------------------------
-        if (G.autoBrightEnabled) {
+        if (G.autoBrightEnabled == 1) {
             loopAutoBrightLogic();
         }
 
-        if (G.prog == COMMAND_IDLE && G.conf == 0) {
+        if (G.prog == COMMAND_IDLE && G.conf == COMMAND_IDLE) {
             led.clear();
             G.prog = COMMAND_MODE_WORD_CLOCK;
         }
@@ -1261,7 +1265,7 @@ void ClockWork::loop(struct tm &tm) {
         config["autoBrightEnabled"] = G.autoBrightEnabled;
         config["isRomanLanguage"] = isRomanLanguage();
         config["hasDreiviertel"] = usedUhrType->hasDreiviertel();
-        config["hasZwanzig"] = usedUhrType->hasZwanzig();
+        config["hasTwenty"] = usedUhrType->hasTwenty();
         config["hasWeatherLayout"] = usedUhrType->hasWeatherLayout();
         config["hasSecondsFrame"] = usedUhrType->hasSecondsFrame();
         config["hasMinuteInWords"] = usedUhrType->hasMinuteInWords();
@@ -1321,13 +1325,12 @@ void ClockWork::loop(struct tm &tm) {
         config["command"] = "autoBright";
         if (G.param1 == 0) {
             config["autoBrightEnabled"] = G.autoBrightEnabled;
-            config["autoBrightOffset"] = G.autoBrightOffset;
-            config["autoBrightSlope"] = G.autoBrightSlope;
+            config["autoBrightMin"] = G.autoBrightMin;
+            config["autoBrightMax"] = G.autoBrightMax;
+            config["autoBrightPeak"] = G.autoBrightPeak;
         }
-        // Original: config["autoBrightSensor"] = map(analogRead(A0), 0, 1023,
-        // 0, 255);
-        config["autoBrightSensor"] = (int)lux;
-        config["autoBrightGain"] = (int)ledGain;
+        config["autoBrightSensor"] = (uint32_t)lux;
+        config["autoBrightGain"] = (uint8_t)ledGain;
         serializeJson(config, str);
         webSocket.sendTXT(G.client_nr, str, strlen(str));
         break;
@@ -1373,9 +1376,9 @@ void ClockWork::loop(struct tm &tm) {
     case COMMAND_SET_MINUTE:
     case COMMAND_SET_BRIGHTNESS:
     case COMMAND_SET_AUTO_BRIGHT:
-    case COMMAND_SET_LANGUAGE_VARIANT:
     case COMMAND_SET_WHITETYPE:
-    case COMMAND_SET_TIME_MANUAL: {
+    case COMMAND_SET_TIME_MANUAL:
+    case COMMAND_SET_LAYOUT_VARIANT: {
         eeprom::write();
         led.clear();
         memset(frameArray, false, sizeof(frameArray));
@@ -1383,18 +1386,10 @@ void ClockWork::loop(struct tm &tm) {
         break;
     }
 
-    case COMMAND_SET_LAYOUT_VARIANT: {
-        eeprom::write();
-        led.clear();
-        memset(frameArray, false, sizeof(frameArray));
-        layoutChanged = true;
-        break;
-    }
-
+    case COMMAND_SET_LANGUAGE_VARIANT:
     case COMMAND_SET_SETTING_SECOND: {
         eeprom::write();
         led.clear();
-        memset(frameArray, false, sizeof(frameArray));
         G.progInit = true;
         parametersChanged = true;
         break;

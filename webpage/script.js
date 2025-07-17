@@ -67,7 +67,7 @@ var h20 = 100;
 var h22 = 100;
 var h24 = 100;
 var dialect = [0, 0, 0, 0, 0, 0];
-var layVar = [0, 0, 0];
+var layVar = [0, 0, 0, 0, 0, 0];
 var showSeconds = 0;
 var showMinutes = 0;
 var hasHappyBirthday = 0;
@@ -88,8 +88,9 @@ var bootShowIP = 0;
 var autoBrightDisplay = 0;
 var autoBrightEnabled = 0;
 var autoBrightInterval = null;
-var autoBrightOffset = " ";
-var autoBrightSlope = " ";
+var autoBrightMin = 10;
+var autoBrightMax = 80;
+var autoBrightPeak = 750;
 var transitionType = 0;
 var transitionDuration = 1;
 var transitionSpeed = 30;
@@ -212,7 +213,7 @@ function initConfigValues() {
 	h22 = 100;
 	h24 = 100;
 	dialect = [0, 0, 0, 0, 0, 0];
-	layVar = [0, 0, 0];
+	layVar = [0, 0, 0, 0, 0, 0];
 	showSeconds = 0;
 	showMinutes = 0;
 	buildtype = 0;
@@ -232,8 +233,9 @@ function initConfigValues() {
 	bootShowIP = 0;
 	autoBrightDisplay = 0;
 	autoBrightEnabled = 0;
-	autoBrightOffset = 10;
-	autoBrightSlope = 127;
+	autoBrightMin = 10;
+	autoBrightMax = 80;
+	autoBrightPeak = 750;
 	transitionType = 0;
 	transitionDuration = 1;
 	transitionSpeed = 30;
@@ -379,6 +381,9 @@ function initWebsocket() {
 			document.getElementById("layvar-0").checked = data.layVar0;
 			document.getElementById("layvar-1").checked = data.layVar1;
 			document.getElementById("layvar-2").checked = data.layVar2;
+			document.getElementById("layvar-3").checked = data.layVar3;
+			document.getElementById("layvar-4").checked = data.layVar4;
+			document.getElementById("layvar-5").checked = data.layVar5;
 
 			$("#slider-brightness").set("value", data.effectBri);
 			$("#slider-speed").set("value", data.effectSpeed); // TODO: there is no property effectSpeed!
@@ -403,7 +408,7 @@ function initWebsocket() {
 
 			enableSpecific("specific-layout-1", !data.isRomanLanguage);
 			enableSpecific("specific-layout-2", data.hasDreiviertel);
-			enableSpecific("specific-layout-3", data.hasZwanzig);
+			enableSpecific("specific-layout-3", data.hasTwenty);
 			enableSpecific("specific-layout-4", data.hasSecondsFrame);
 			enableSpecific("specific-layout-5", data.hasWeatherLayout);
 			enableSpecific("specific-layout-6", data.UhrtypeDef === 10); // Add A-Quarter to (En10x11 exclusive)
@@ -417,8 +422,20 @@ function initWebsocket() {
 			removeSpecificOption("show-minutes", "2", data.UhrtypeDef === 13); // Remove "LED7x" for Ger16x8
 
 			autoBrightEnabled = data.autoBrightEnabled;
-			$("#auto-bright-enabled").set("value", autoBrightEnabled);
-			enableSpecific("specific-layout-brightness-man", autoBrightEnabled === 0);
+			if (autoBrightEnabled === 9) {
+				// hide auto/manual select box
+				$("#auto-bright-enabled").fill(EE("option", { "@value": "-1" }, "not available"));
+				$("#auto-bright-enabled").set("value", -1);
+				$("#auto-bright-enabled").up(".pure-control-group").hide();
+				autoBrightStop();
+			} else if (autoBrightEnabled === 1) {
+				$("#auto-bright-enabled").set("value", 1);
+				autoBrightUpdater();
+			} else {
+				$("#auto-bright-enabled").set("value", 0);
+				autoBrightStop();
+			}
+			enableSpecific("specific-layout-brightness-man", autoBrightEnabled !== 1);
 			enableSpecific("specific-layout-brightness-auto", autoBrightEnabled === 1);
 		}
 		if (data.command === "set") {
@@ -461,8 +478,14 @@ function initWebsocket() {
 			$("#auto-bright-enabled").set("value", data.autoBrightEnabled);
 			$("#auto-bright-sensor").set("value", data.autoBrightSensor);
 			$("#auto-bright-gain").set("value", data.autoBrightGain);
-			$("#auto-bright-offset").set("value", data.autoBrightOffset);
-			$("#auto-bright-slope").set("value", data.autoBrightSlope);
+			$("#auto-bright-min").set("value", data.autoBrightMin);
+			$("#auto-bright-max").set("value", data.autoBrightMax);
+			$("#auto-bright-peak").set("value", data.autoBrightPeak);
+			if (typeof data.autoBrightEnabled !== "undefined" && data.autoBrightEnabled === 1) {
+				autoBrightUpdater();
+			} else if (typeof data.autoBrightEnabled !== "undefined" && data.autoBrightEnabled !== 1) {
+				autoBrightStop();
+			}
 		}
 	};
 	websocket.onerror = function(event) {
@@ -569,7 +592,8 @@ function updateManualTimeInput() {
 }
 
 function autoBrightUpdater() {
-	if (autoBrightInterval !== null || autoBrightEnabled !== 1) {
+	// note: autoBrightEnabled is a string if the value originates from an input (onChange event)
+	if (autoBrightInterval !== null || (autoBrightEnabled !== 1 && autoBrightEnabled !== "1")) {
 		return;
 	}
 	autoBrightInterval = setInterval(function() {
@@ -622,12 +646,10 @@ function sendBrightnessData(command, addData = "") {
 }
 
 function sendColorData(command, addData = "") {
-	sendCmd(command, nstr(hsb[COLOR_FOREGROUND][0]) +
-	nstr(hsb[COLOR_FOREGROUND][1]) +
-	nstr(hsb[COLOR_FOREGROUND][2]) +
-	nstr(hsb[COLOR_BACKGROUND][0]) +
-	nstr(hsb[COLOR_BACKGROUND][1]) +
-	nstr(hsb[COLOR_BACKGROUND][2]) +
+	sendCmd(command, nstr(colorPosition) +
+	nstr(hsb[colorPosition][0]) +
+	nstr(hsb[colorPosition][1]) +
+	nstr(hsb[colorPosition][2]) +
 	nstr(effectBri) +
 	nstr(effectSpeed));
 }
@@ -863,9 +885,14 @@ $.ready(function() {
 	});
 	$("[id*='auto-bright']").on("change", function() {
 		autoBrightEnabled = $("#auto-bright-enabled").get("value");
-		autoBrightOffset = $("#auto-bright-offset").get("value");
-		autoBrightSlope = $("#auto-bright-slope").get("value");
-		sendCmd(COMMAND_SET_AUTO_BRIGHT, nstr(autoBrightEnabled) + nstr(autoBrightOffset) + nstr(autoBrightSlope));
+		autoBrightMin = $("#auto-bright-min").get("value");
+		autoBrightMax = $("#auto-bright-max").get("value");
+		if (autoBrightMin > autoBrightMax) {
+			autoBrightMax = autoBrightMin;
+			$("#auto-bright-max").set("value", autoBrightMax);
+		}
+		autoBrightPeak = $("#auto-bright-peak").get("value");
+		sendCmd(COMMAND_SET_AUTO_BRIGHT, nstr(autoBrightEnabled) + nstr(autoBrightMin) + nstr(autoBrightMax) + nstr(autoBrightPeak));
 		sendCmd(COMMAND_REQUEST_AUTO_BRIGHT);	// read back values
 
 		autoBrightDisplay = Number($("#auto-bright-enabled").get("value"));
@@ -977,8 +1004,11 @@ $.ready(function() {
 		layVar[0] = $("#layvar-0").get("checked") | 0;
 		layVar[1] = $("#layvar-1").get("checked") | 0;
 		layVar[2] = $("#layvar-2").get("checked") | 0;
+		layVar[3] = $("#layvar-3").get("checked") | 0;
+		layVar[4] = $("#layvar-4").get("checked") | 0;
+		layVar[5] = $("#layvar-5").get("checked") | 0;
 
-		sendCmd(COMMAND_SET_LAYOUT_VARIANT, nstr(layVar[0]) + nstr(layVar[1]) + nstr(layVar[2]));
+		sendCmd(COMMAND_SET_LAYOUT_VARIANT, nstr(layVar[0]) + nstr(layVar[1]) + nstr(layVar[2]) + nstr(layVar[3]) + nstr(layVar[4]) + nstr(layVar[5]));
 		debugMessage("layVar" + debugMessageReconfigured);
 	});
 	$("[id*='buildtype']").on("change", function() {

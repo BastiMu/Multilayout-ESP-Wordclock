@@ -101,7 +101,6 @@ let TRANSLATION_ES = {
 			"de-10-11": "🇩🇪 10 × 11",
 			"de-10-11-alt": "🇩🇪 10 × 11 Alternativ",
 			"de-10-11-alt-frame": "🇩🇪 10 × 11 Alternativer Rahmen",
-			"de-10-11-vertical": "🇩🇪 10 × 11 Vertikal",
 			"de-10-11-clock": "🇩🇪 10 × 11 Uhr",
 			"de-10-11-nero": "🇩🇪 10 × 11 Nero",
 			"de-10-11-nero-frame": "🇩🇪 10 × 11 Nero Rahmen",
@@ -110,6 +109,7 @@ let TRANSLATION_ES = {
 			"de-11-11": "🇩🇪 11 × 11",
 			"de-11-11-v2": "🇩🇪 11 × 11 Version 2",
 			"de-11-11-v3": "🇩🇪 11 × 11 (panbachi)",
+			"de-13-13": "🇩🇪 13 × 13",
 			"de-22-11-weather": "🇩🇪 10 × 11 Wetter",
 			"de-16-8": "🇩🇪 16 × 8",
 			"de-16-18": "🇩🇪 16 × 18",
@@ -117,6 +117,7 @@ let TRANSLATION_ES = {
 			"de-08-08-viertel": "🇩🇪 8 × 8 Cuartos",
 			"en-10-11": "🇬🇧 10 × 11",
 			"en-08-08": "🇬🇧 8 × 8",
+			"en-11-12": "🇬🇧 11 × 12",
 			"nl-10-11": "🇳🇱 10 × 11",
 			"es-10-11": "🇪🇸 10 × 11",
 			"es-08-08-cuarto": "🇪🇸 8 × 8 Cuartos",
@@ -242,14 +243,20 @@ let TRANSLATION_ES = {
 			"eighteen-to-twenty": "18:00 – 19:59",
 			"twenty-to-twenty-two": "20:00 – 21:59",
 			"twenty-two-to-zero": "22:00 – 23:59",
-			"value-sensor": "Brillo actual del fotorresistor (LDR)",
-			"value-gain": "LED Gain [%]",
-			"help-offset": "Configuration of the brightness offset:<br/>It determines the minimum brightness of the LEDs at 0 lux ambient light:<br/> " +
-			"0=LEDs off, n=LED brightness is n/255, 255=LEDs always have the maximum brightness",
-			"value-offset": "Offset (0–255)",
-			"help-slope": "Configuration of the slope:<br/>It determines the degree of LED brightness change when the ambient light changes.<br/> " +
-			"0=weak LED brightness change, 16=neutral LED brightness change, 255=strong LED brightness change",
-			"value-slope": "Slope (0–255)"
+			"value-sensor": "Luz ambiental (lx)",
+			"value-gain": "Luminosidad de los LED (%)",
+			"help-min": "Configuración de luminosidad mínima:<br/>" +
+				"Define la luminosidad mínima de los LED en porcentaje en oscuridad absoluta. (0 lx).<br/>" +
+				"0 = LEDs apagados, 100 = los LED funcionan siempre con la máxima luminosidad (100 %)",
+			"value-min": "Luminosidad mínima (0–100)",
+			"help-max": "Configuración de la luminosidad máxima:<br/>" +
+				"Define la luminosidad máxima en porcentaje a la que funcionan los LED.<br/>" +
+				"Con valores superiores al 80 %, cabe esperar una mayor degradación (envejecimiento) de los LED que se encienden permanentemente o con frecuencia.<br />" +
+				"10 = luminosidad baja (10 %), 100 = lo más luminosas posible (100 %)",
+			"value-max": "Luminosidad máxima (10–100)",
+			"help-peak": "Configuración del punto de referencia para el brillo máximo de los LED:<br/>" +
+				"Determina la luz ambiente (lx) a la que los LED se encienden con la luminosidad máxima definida.",
+			"value-peak": "Luz ambiental de referencia (10–1500)"
 		},
 		"hostname": {
 			"h2": "Hostname",

@@ -101,7 +101,6 @@ let TRANSLATION_NL = {
 			"de-10-11": "🇩🇪 10 × 11",
 			"de-10-11-alt": "🇩🇪 10 × 11 Alternatief",
 			"de-10-11-alt-frame": "🇩🇪 10 × 11 Alternatief Frame",
-			"de-10-11-vertical": "🇩🇪 10 × 11 Verticaal",
 			"de-10-11-clock": "🇩🇪 10 × 11 Clock",
 			"de-10-11-nero": "🇩🇪 10 × 11 Nero",
 			"de-10-11-nero-frame": "🇩🇪 10 × 11 Nero Frame",
@@ -110,6 +109,7 @@ let TRANSLATION_NL = {
 			"de-11-11": "🇩🇪 11 × 11",
 			"de-11-11-v2": "🇩🇪 11 × 11 Versie 2",
 			"de-11-11-v3": "🇩🇪 11 × 11 (panbachi)",
+			"de-13-13": "🇩🇪 13 × 13",
 			"de-22-11-weather": "🇩🇪 10 × 11 Weer",
 			"de-16-8": "🇩🇪 16 × 8",
 			"de-16-18": "🇩🇪 16 × 18",
@@ -117,6 +117,7 @@ let TRANSLATION_NL = {
 			"de-08-08-viertel": "🇩🇪 8 × 8 Kwart uren",
 			"en-10-11": "🇬🇧 10 × 11",
 			"en-08-08": "🇬🇧 8 × 8",
+			"en-11-12": "🇬🇧 11 × 12",
 			"nl-10-11": "🇳🇱 10 × 11",
 			"es-10-11": "🇪🇸 10 × 11",
 			"es-08-08-cuarto": "🇪🇸 8 × 8 Kwart uren",
@@ -245,14 +246,20 @@ let TRANSLATION_NL = {
 			"eighteen-to-twenty": "18:00 – 19:59",
 			"twenty-to-twenty-two": "20:00 – 21:59",
 			"twenty-two-to-zero": "22:00 – 23:59",
-			"value-sensor": "Huidige helderheid volgens sensor",
-			"value-gain": "LED Gain [%]",
-			"help-offset": "Configuratie van de helderheidsoffset:<br/>Deze bepaalt de minimale helderheid van de LED's bij 0 lux omgevingslicht:<br/>" +
-			"0=LEDs uit, n=LED-helderheid is n/255, 255=LEDs hebben altijd de maximale helderheid",
-			"value-offset": "Offset (0–255)",
-			"help-slope": "Configuratie van de helling:<br/>deze bepaalt de mate waarin de LED-helderheid verandert wanneer het omgevingslicht verandert.<br/>" +
-			"0=zwakke LED helderheidsverandering, 16=neutrale LED helderheidsverandering, 255=sterke LED helderheidsverandering",
-			"value-slope": "Donker (0 – 255)"
+			"value-sensor": "Omgevingslicht (lx)",
+			"value-gain": "LED-helderheid (%)",
+			"help-min": "Configuratie van de minimale helderheid:<br/>" +
+				"Bepaalt de minimale helderheid van de LED's in procenten bij absolute duisternis (0 lx).<br/>" +
+				"0 = LED's uit, 100 = LED's werken altijd op maximale helderheid (100 %)",
+			"value-min": "Minimale helderheid (0–100)",
+			"help-max": "Configuratie van de maximale helderheid:<br/>" +
+				"Bepaalt de maximale helderheid in procenten waarmee de LED's werken.<br/>" +
+				"Bij waarden boven 80 % is een verhoogde degradatie (veroudering) te verwachten voor LED's die permanent of vaak oplichten.<br />" +
+				"10 = geringe helderheid (10 %), 100 = zo helder mogelijk (100 %)",
+			"value-max": "Maximale helderheid (10–100)",
+			"help-peak": "Configuratie van het referentiepunt voor de maximale LED-helderheid:<br/>" +
+				"Bepaalt het omgevingslicht (lx) waarbij de LED's oplichten met de gedefinieerde maximale helderheid.",
+			"value-peak": "Referentie omgevingslicht (10–1500)"
 		},
 		"hostname": {
 			"h2": "Hostnaam",

@@ -125,7 +125,6 @@ let TRANSLATION_DE_DE = {
 			"de-10-11": "🇩🇪 10 × 11",
 			"de-10-11-alt": "🇩🇪 10 × 11 Alternativ",
 			"de-10-11-alt-frame": "🇩🇪 10 × 11 Alternativer Rahmen",
-			"de-10-11-vertical": "🇩🇪 10 × 11 Vertikal",
 			"de-10-11-clock": "🇩🇪 10 × 11 Uhr",
 			"de-10-11-nero": "🇩🇪 10 × 11 Nero",
 			"de-10-11-nero-frame": "🇩🇪 10 × 11 Nero Rahmen",
@@ -135,6 +134,7 @@ let TRANSLATION_DE_DE = {
 			"de-11-11-v2": "🇩🇪 11 × 11 Version 2",
 			"de-11-11-v3": "🇩🇪 11 × 11 (panbachi)",
 			"de-11-11-v4": "🇩🇪 11 × 11 (Minuten)",
+			"de-13-13": "🇩🇪 13 × 13",
 			"de-22-11-weather": "🇩🇪 10 × 11 Wetter",
 			"de-16-8": "🇩🇪 16 × 8",
 			"de-16-18": "🇩🇪 16 × 18",
@@ -142,6 +142,7 @@ let TRANSLATION_DE_DE = {
 			"de-08-08-viertel": "🇩🇪 8 × 8 Viertelstunden",
 			"en-10-11": "🇬🇧 10 × 11",
 			"en-08-08": "🇬🇧 8 × 8",
+			"en-11-12": "🇬🇧 11 × 12",
 			"nl-10-11": "🇳🇱 10 × 11",
 			"es-10-11": "🇪🇸 10 × 11",
 			"es-08-08-cuarto": "🇪🇸 8 × 8 Viertelstunden",
@@ -156,6 +157,9 @@ let TRANSLATION_DE_DE = {
 			"invert-min-dir": "Minutenzählrichtung invertieren",
 			"mirror-vertically": "Wortuhr vertikal spiegeln",
 			"mirror-horizontally": "Wortuhr horizontal spiegeln",
+			"flip-horz-vert": "Horizontales und vertikales Layout drehen",
+			"extra-led-per-row": "Extra LED pro Reihe hinzufügen",
+			"meander-rows": "Reihen in Mäander angeordnet",
 			"buildtype": "Bauart",
 			"normal": "Jede LED entspricht einem Buchstaben",
 			"doubleResM1": "Jede zweite LED entspricht einem Buchstaben",
@@ -270,14 +274,20 @@ let TRANSLATION_DE_DE = {
 			"eighteen-to-twenty": "18:00 – 19:59",
 			"twenty-to-twenty-two": "20:00 – 21:59",
 			"twenty-two-to-zero": "22:00 – 23:59",
-			"value-sensor": "Licht Sensor [Lux]",
-			"value-gain": "LED Gain [%]",
-			"help-offset": "Konfiguration des Helligkeitsoffsets:<br/>Sie bestimmt die minimale Helligkeit der LEDs bei 0 Lux Umgebungslicht:<br/>" +
-				"0=LEDs aus, LED Helligkeit ist n/255, 255=LEDs haben immer die maximale Helligkeit",
-			"value-offset": "Offset (0–255)",
-			"help-slope": "Konfiguration der Steilheit:<br/>Sie bestimmt den Grad der LED-Helligkeitsänderung bei Änderung des Umgebungslichts.<br/>" +
-				"0=schwache LED-Helligkeitsänderung, 16=neutrale LED-Helligkeitsänderung, 255=starke LED-Helligkeitsänderung",
-			"value-slope": "Steilheit (0–255)"
+			"value-sensor": "Umgebungslicht (lx)",
+			"value-gain": "LED Helligkeit (%)",
+			"help-min": "Konfiguration der minimalen Helligkeit:<br/>" +
+				"Definiert die minimale Helligkeit der LEDs in Prozent bei absoluter Dunkelheit (0 lx).<br/>" +
+				"0 = LEDs aus, 100 = LEDs leuchten immer mit maximaler Helligkeit (100 %)",
+			"value-min": "Minimale Helligkeit (0–100)",
+			"help-max": "Konfiguration der maximalen Helligkeit:<br/>" +
+				"Definiert die maximale Helligkeit in Prozent, mit der die LEDs angesteuert werden.<br/>" +
+				"Bei Werten oberhalb von 80 % ist mit einer erhöhten Degradation (Alterung) der LEDs zu rechnen, die dauerhaft oder häufig leuchten.<br />" +
+				"10 = geringe Helligkeit (10 %), 100 = so hell wie möglich (100 %)",
+			"value-max": "Maximale Helligkeit (10–100)",
+			"help-peak": "Konfiguration des Referenzpunktes für die maximale LED-Helligkeit:<br/>" +
+				"Legt fest, ab welchem Umgebungslicht (lx) die LEDs mit der definierten maximalen Helligkeit leuchten.",
+			"value-peak": "Referenz-Umgebungslicht (10–1500)"
 		},
 		"hostname": {
 			"h2": "Hostname",

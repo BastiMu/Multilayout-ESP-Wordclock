@@ -148,17 +148,15 @@ bool compareEffBriAndSpeedToOld(uint8_t *payload) {
 
 //------------------------------------------------------------------------------
 
-void parseColor(uint8_t *payload, ColorPosition position = Foreground) {
-    if (position == Background) {
-        G.color[position] = {HsbColor(split(payload, 12) / 360.f,
-                                      split(payload, 15) / 100.f,
-                                      split(payload, 18) / 100.f)};
-    } else {
-        G.color[position] = {HsbColor(split(payload, 3) / 360.f,
-                                      split(payload, 6) / 100.f,
-                                      split(payload, 9) / 100.f)};
-    }
+void parseColor(uint8_t *payload) {
+    ColorPosition position = static_cast<ColorPosition>(split(payload, 3));
+    G.color[position] = {HsbColor(split(payload, 6) / 360.f,
+                                  split(payload, 9) / 100.f,
+                                  split(payload, 12) / 100.f)};
     colorChangedByWebsite = true;
+
+    G.effectBri = split(payload, 15);
+    G.effectSpeed = split(payload, 18);
 }
 
 //------------------------------------------------------------------------------
@@ -200,7 +198,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
             }
             parametersChanged = true;
             parseColor(payload);
-            parseColor(payload, Background);
             break;
         }
 
@@ -235,31 +232,15 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
             }
 
             parseColor(payload);
-            G.effectSpeed = split(payload, 24);
             break;
         }
 
             //------------------------------------------------------------------------------
-
+        case COMMAND_MODE_RAINBOW:
         case COMMAND_MODE_RAINBOWCYCLE: {
             if ((G.prog != command) || compareEffBriAndSpeedToOld(payload)) {
                 G.progInit = true;
             }
-
-            G.effectBri = split(payload, 21);
-            G.effectSpeed = split(payload, 24);
-            break;
-        }
-
-            //------------------------------------------------------------------------------
-
-        case COMMAND_MODE_RAINBOW: {
-            if ((G.prog != command) || compareEffBriAndSpeedToOld(payload)) {
-                G.progInit = true;
-            }
-
-            G.effectBri = split(payload, 21);
-            G.effectSpeed = split(payload, 24);
             break;
         }
 
@@ -282,8 +263,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
             }
 
             parseColor(payload);
-            G.effectBri = split(payload, 21);
-            G.effectSpeed = split(payload, 24);
             break;
         }
             //------------------------------------------------------------------------------
@@ -296,7 +275,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
             G.transitionSpeed = split(payload, 9);
             G.transitionColorize = split(payload, 12);
             G.transitionDemo = split(payload, 15);
-            ;
             break;
         }
 
@@ -362,8 +340,23 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
 
         case COMMAND_SET_AUTO_BRIGHT: {
             G.autoBrightEnabled = split(payload, 3);
-            G.autoBrightOffset = split(payload, 6);
-            G.autoBrightSlope = split(payload, 9);
+            G.autoBrightMin = split(payload, 6);
+            G.autoBrightMax = split(payload, 9);
+            G.autoBrightPeak = split(payload, 12, 4);
+
+            if (G.autoBrightMin < 0)
+                G.autoBrightMin = 0;
+            if (G.autoBrightMin > 100)
+                G.autoBrightMin = 100;
+            if (G.autoBrightMax < 10)
+                G.autoBrightMax = 10;
+            if (G.autoBrightMax > 100)
+                G.autoBrightMax = 100;
+            if (G.autoBrightPeak < 10)
+                G.autoBrightPeak = 10;
+            if (G.autoBrightPeak > 1500)
+                G.autoBrightPeak = 1500;
+
             break;
         }
 
@@ -385,6 +378,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
             G.layoutVariant[ReverseMinDirection] = split(payload, 3);
             G.layoutVariant[MirrorVertical] = split(payload, 6);
             G.layoutVariant[MirrorHorizontal] = split(payload, 9);
+            G.layoutVariant[FlipHorzVert] = split(payload, 12);
+            G.layoutVariant[ExtraLedPerRow] = split(payload, 15);
+            G.layoutVariant[MeanderRows] = split(payload, 18);
             break;
         }
 

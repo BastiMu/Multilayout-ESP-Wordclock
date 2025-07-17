@@ -125,7 +125,6 @@ let TRANSLATION_EN_US = {
 			"de-10-11": "🇩🇪 10 × 11",
 			"de-10-11-alt": "🇩🇪 10 × 11 Alternative",
 			"de-10-11-alt-frame": "🇩🇪 10 × 11 Alternative Frame",
-			"de-10-11-vertical": "🇩🇪 10 × 11 Vertical",
 			"de-10-11-clock": "🇩🇪 10 × 11 Clock",
 			"de-10-11-nero": "🇩🇪 10 × 11 Nero",
 			"de-10-11-nero-frame": "🇩🇪 10 × 11 Nero Frame",
@@ -134,7 +133,8 @@ let TRANSLATION_EN_US = {
 			"de-11-11": "🇩🇪 11 × 11",
 			"de-11-11-v2": "🇩🇪 11 × 11 Version 2",
 			"de-11-11-v3": "🇩🇪 11 × 11 (panbachi)",
-			"de-11-11-v3": "🇩🇪 11 × 11 (minutes)",
+			"de-11-11-v4": "🇩🇪 11 × 11 (minutes)",
+			"de-13-13": "🇩🇪 13 × 13",
 			"de-22-11-weather": "🇩🇪 10 × 11 Weather",
 			"de-16-8": "🇩🇪 16 × 8",
 			"de-16-18": "🇩🇪 16 × 18",
@@ -142,6 +142,7 @@ let TRANSLATION_EN_US = {
 			"de-08-08-viertel": "🇩🇪 8 × 8 Quarter hours",
 			"en-10-11": "🇬🇧 10 × 11",
 			"en-08-08": "🇬🇧 8 × 8",
+			"en-11-12": "🇬🇧 11 × 12",
 			"nl-10-11": "🇳🇱 10 × 11",
 			"es-10-11": "🇪🇸 10 × 11",
 			"es-08-08-cuarto": "🇪🇸 8 × 8 Quarter hours",
@@ -156,6 +157,9 @@ let TRANSLATION_EN_US = {
 			"invert-min-dir": "Invert Minute Counting Direction",
 			"mirror-vertically": "Mirror Word Clock Vertically",
 			"mirror-horizontally": "Mirror Word Clock Horizontally",
+			"extra-led-per-row": "Add Extra LED per Row",
+			"flip-horz-vert": "Flip Horizontally and Vertically Layout",
+			"meander-rows": "Rows placed in meanders",
 			"buildtype": "Buildtype",
 			"normal": "Each LED corresponds to one letter",
 			"doubleResM1": "Every second LED corresponds to one letter",
@@ -270,14 +274,20 @@ let TRANSLATION_EN_US = {
 			"eighteen-to-twenty": "18:00 – 19:59",
 			"twenty-to-twenty-two": "20:00 – 21:59",
 			"twenty-two-to-zero": "22:00 – 23:59",
-			"value-sensor": "Current Brightness from the Photoresistor (LDR)",
-			"value-gain": "LED Gain [%]",
-			"help-offset": "Configuration of the brightness offset:<br/>It determines the minimum brightness of the LEDs at 0 lux ambient light:<br/>" +
-			"0=LEDs off, LED brightness is n/255, 255=LEDs always have the maximum brightness.",
-			"value-offset": "Offset (0–255)",
-			"help-slope": "Configuration of the slope:<br/>It determines the degree of LED brightness change when the ambient light changes.<br/>" +
-			"0=weak LED brightness change, 16=neutral LED brightness change, 255=strong LED brightness change",
-			"value-slope": "Slope (0–255)"
+			"value-sensor": "Ambient light (lx)",
+			"value-gain": "LED brightness (%)",
+			"help-min": "Configuration of the minimum brightness:<br/>" +
+				"Defines the minimum brightness of the LEDs in percent in absolute darkness (0 lx).<br/>" +
+				"0 = LEDs off, 100 = LEDs always operate at maximum brightness (100 %)",
+			"value-min": "Minimum brightness (0–100)",
+			"help-max": "Configuration of the maximum brightness:<br/>" +
+				"Defines the maximum brightness in percent with which the LEDs are driven.<br/>" +
+				"At values above 80 %, increased degradation (ageing) is to be expected for LEDs that light up permanently or often.<br />" +
+				"10 = low brightness (10 %), 100 = as bright as possible (100 %)",
+			"value-max": "Maximum brightness (10–100)",
+			"help-peak": "Configuration of the reference point for the maximum LED brightness:<br/>" +
+				"Determines the ambient light (lx) at which the LEDs light up with the defined maximum brightness.",
+			"value-peak": "Reference ambient light (10–1500)"
 		},
 		"hostname": {
 			"h2": "Hostname",

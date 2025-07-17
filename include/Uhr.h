@@ -113,7 +113,7 @@ struct GLOBAL {
     MinuteVariant minuteVariant;
     ItIsVariant itIsVariant;
     bool languageVariant[6];
-    bool layoutVariant[3];
+    bool layoutVariant[6];
     char timeserver[PAYLOAD_LENGTH];
     char hostname[PAYLOAD_LENGTH];
     char scrollingText[PAYLOAD_LENGTH];
@@ -137,8 +137,9 @@ struct GLOBAL {
     OpenWeatherMapData openWeatherMap;
 
     uint8_t autoBrightEnabled;
-    uint8_t autoBrightOffset;
-    uint8_t autoBrightSlope;
+    uint8_t autoBrightMin;
+    uint8_t autoBrightMax;
+    uint16_t autoBrightPeak;
     uint8_t transitionType;
     uint8_t transitionDuration;
     uint8_t transitionSpeed;
@@ -155,7 +156,7 @@ struct GLOBAL {
 GLOBAL G = {};
 
 // LDR
-float ledGain = 100;
+float ledGain = DEFAULT_BRIGHTNESS;
 
 uint8_t _second = 0;
 uint8_t _secondFrame = 0;
@@ -206,6 +207,9 @@ enum LayoutVariants {
     ReverseMinDirection = 0,
     MirrorVertical = 1,
     MirrorHorizontal = 2,
+    FlipHorzVert = 3,
+    ExtraLedPerRow = 4,
+    MeanderRows = 5,
 };
 
 enum fontSize {
@@ -272,10 +276,10 @@ enum CommandWords {
 enum ClockType {
     Eng10x11 = 10,
     Eng08x08 = 29,
+    Eng11x12 = 32,
     Ger10x11 = 1,
     Ger10x11Alternative = 2,
     Ger10x11AlternativeFrame = 4,
-    Ger10x11Vertical = 12,
     Ger10x11Clock = 6,
     Ger10x11schwaebisch = 20,
     Ger10x11Nero = 11,
@@ -284,7 +288,8 @@ enum ClockType {
     Ger11x11 = 3,
     Ger11x11V2 = 8,
     Ger11x11V3 = 14,
-    Ger11x11V4 = 31,
+    Ger11x11V4 = 32,
+    Ger13x13 = 31,
     Ger22x11Weather = 5,
     Ger16x8 = 13,
     Ger16x18 = 7,

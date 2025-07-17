@@ -341,7 +341,6 @@
                                 <option value="1"  data-i18next="view.front.de-10-11" selected></option>
                                 <option value="2"  data-i18next="view.front.de-10-11-alt"></option>
                                 <option value="4" data-i18next="view.front.de-10-11-alt-frame"></option>
-                                <option value="12" data-i18next="view.front.de-10-11-vertical"></option>
                                 <option value="6"  data-i18next="view.front.de-10-11-clock"></option>
                                 <option value="20"  data-i18next="view.front.de-10-11-schwaebisch"></option>
                                 <option value="11" data-i18next="view.front.de-10-11-nero"></option>
@@ -350,7 +349,8 @@
                                 <option value="3"  data-i18next="view.front.de-11-11"></option>
                                 <option value="8"  data-i18next="view.front.de-11-11-v2"></option>
                                 <option value="14"  data-i18next="view.front.de-11-11-v3"></option>
-                                <option value="31"  data-i18next="view.front.de-11-11-v4"></option>
+                                <option value="32"  data-i18next="view.front.de-11-11-v4"></option>
+                                <option value="31" data-i18next="view.front.de-13-13"></option>
                                 <option value="5"  data-i18next="view.front.de-22-11-weather"></option>
                                 <option value="13"  data-i18next="view.front.de-16-8"></option>
                                 <option value="7"  data-i18next="view.front.de-16-18"></option>
@@ -358,6 +358,7 @@
                                 <option value="25" data-i18next="view.front.de-08-08-viertel"></option>
                                 <option value="10" data-i18next="view.front.en-10-11"></option>
                                 <option value="29" data-i18next="view.front.en-08-08"></option>
+                                <option value="32" data-i18next="view.front.en-11-12"></option>
                                 <option value="9"  data-i18next="view.front.nl-10-11"></option>
                                 <option value="15"  data-i18next="view.front.es-10-11"></option>
                                 <option value="28" data-i18next="view.front.es-08-08-cuarto"></option>
@@ -389,6 +390,27 @@
                                 <label for="layvar-2" data-i18next="view.front.mirror-horizontally"></label>
                                 <label class="switch">
                                     <input type="checkbox" id="layvar-2">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="pure-control-group">
+                                <label for="layvar-3" data-i18next="view.front.flip-horz-vert"></label>
+                                <label class="switch">
+                                    <input type="checkbox" id="layvar-3">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="pure-control-group">
+                                <label for="layvar-4" data-i18next="view.front.extra-led-per-row"></label>
+                                <label class="switch">
+                                    <input type="checkbox" id="layvar-4">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="pure-control-group">
+                                <label for="layvar-5" data-i18next="view.front.meander-rows"></label>
+                                <label class="switch">
+                                    <input type="checkbox" id="layvar-5">
                                     <span class="slider round"></span>
                                 </label>
                             </div>
@@ -707,13 +729,17 @@
                                 <label for="auto-bright-gain" data-i18next="settings.brightness.value-gain"></label><input id="auto-bright-gain" type="text" value=" " readonly>
                             </div>
                             <br>
-                            <legend data-i18next="settings.brightness.help-offset"></legend>
+                            <legend data-i18next="settings.brightness.help-min"></legend>
                             <div class="pure-control-group">
-                                <label for="auto-bright-offset" data-i18next="settings.brightness.value-offset"></label><input id="auto-bright-offset" type="number" min="0" max="255">
+                                <label for="auto-bright-min" data-i18next="settings.brightness.value-min"></label><input id="auto-bright-min" type="number" min="0" max="100"> %
                             </div>
-                            <legend data-i18next="settings.brightness.help-slope"></legend>
+                            <legend data-i18next="settings.brightness.help-max"></legend>
                             <div class="pure-control-group">
-                                <label for="auto-bright-slope" data-i18next="settings.brightness.value-slope"></label><input id="auto-bright-slope" type="number" min="0" max="255">
+                                <label for="auto-bright-max" data-i18next="settings.brightness.value-max"></label><input id="auto-bright-max" type="number" min="10" max="100"> %
+                            </div>
+                            <legend data-i18next="settings.brightness.help-peak"></legend>
+                            <div class="pure-control-group">
+                                <label for="auto-bright-peak" data-i18next="settings.brightness.value-peak"></label><input id="auto-bright-peak" type="number" min="10" max="1500"> lx
                             </div>
                             <!-- Specific Brightness-automatic End-->
                         </div>

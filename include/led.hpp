@@ -146,7 +146,7 @@ uint8_t Led::getCurrentManualBrightnessSetting() {
     } else if (_hour < 24) {
         return G.h22;
     } else {
-        return 100;
+        return DEFAULT_BRIGHTNESS;
     }
 }
 
@@ -155,7 +155,7 @@ uint8_t Led::getCurrentManualBrightnessSetting() {
 HsbColor Led::getColorbyPositionWithAppliedBrightness(ColorPosition position) {
     HsbColor color = G.color[position];
 
-    if (G.autoBrightEnabled) {
+    if (G.autoBrightEnabled == 1) {
         color.B = setBrightnessAuto(color.B);
     } else {
         color.B *= getCurrentManualBrightnessSetting() / 100.f;
@@ -418,16 +418,20 @@ void Led::set(WordclockChanges changed) {
     setbyFrontMatrix(Foreground);
     setbyFrontMatrix(Background, false);
 
-    if (G.minuteVariant != MinuteVariant::Off) {
-        setbyMinuteArray(Foreground);
-    }
+    if (G.transitionType == NO_TRANSITION) {
+        if (G.minuteVariant != MinuteVariant::Off) {
+            setbyMinuteArray(Foreground);
+        }
 
-    if (G.secondVariant != SecondVariant::Off) {
-        setbySecondArray(Foreground);
+        if (G.secondVariant != SecondVariant::Off) {
+            setbySecondArray(Frame);
+        }
     }
 
     if (transition->isOverwrittenByTransition(changed, _minute)) {
-        show();
+        if (G.transitionType == NO_TRANSITION) {
+            show();
+        }
     }
 }
 
@@ -657,7 +661,7 @@ void Led::showDigitalClock(const char min1, const char min0, const char h1,
     bool showMinutes = true;
     // toogle hours and minutes if clock is not high enough
     if (usedUhrType->rowsWordMatrix() <
-        (pgm_read_byte(&(fontHeight[usedFontSize])) * 2 + 1)) {
+        (pgm_read_byte(&(fontHeight[usedFontSize])) * 2)) {
         if (_second % 4 < 2) { // show hours every 2 seconds
             showHours = true;
             showMinutes = false;

@@ -169,7 +169,6 @@ protected:
     void saveMatrix();
     void analyzeColors(RgbfColor **dest, RgbfColor **source,
                        RgbfColor &foreground, RgbfColor &background);
-    void setMinute(void);
     void copy2Stripe(RgbfColor **source);
     void copyMatrix(RgbfColor **dest, RgbfColor **source);
     void copyMatrixFlags(RgbfColor **dest, RgbfColor **source);
@@ -198,7 +197,7 @@ public:
     //------------------------------------------------------------------------------
     // Loop Helper Functions
     //------------------------------------------------------------------------------
-    void demoMode(uint8_t &_minute, uint8_t _second);
+    void demoMode(uint8_t &_hour, uint8_t &_minute, uint8_t _second);
     void initTransitionStart();
     bool hasMinuteChanged();
     bool isOverwrittenByTransition(WordclockChanges flag, uint8_t minute);
